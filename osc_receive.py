@@ -1,8 +1,6 @@
 '''
 This script receives a Petal formatted OSC stream and prints it to the console.
-
 Usage: python osc_receive.py -t /PetalStream/eeg
-
 valid OSC topics for use with petal streaming apps:
     * /PetalStream/gyroscope
     * /PetalStream/ppg
@@ -14,10 +12,8 @@ valid OSC topics for use with petal streaming apps:
 import argparse
 import math
 import main
-
 import pythonosc.dispatcher
 import pythonosc.osc_server
-
 Active = False
 First = False
 peak_pause = False
@@ -40,7 +36,6 @@ def print_petal_stream_handler(unused_addr, *args):
         * float: unix timestamp (decimal)
         * int: LSL timestamp (whole number)
         * float: LSL timestamp (decimal)
-
     The next set of data in the transmission follow these formats:
     telemetry:
         * float: battery level
@@ -80,25 +75,25 @@ def print_petal_stream_handler(unused_addr, *args):
         num_blinks += 1
         are_we_counting_blinks = True
         blink_window = 0
-
     if (are_we_counting_blinks and blink_window < 300):
         blink_window += 1
     if (are_we_counting_blinks and blink_window == 300):
         are_we_counting_blinks = False
-        if (num_blinks == 2):
+        if (num_blinks == 1):
             print("play/pause!")
             main.play_or_pause()
-
-        elif (num_blinks == 3):
+        elif (num_blinks == 2):
             print("NEXT SONG!")
             main.skip()
-
+        elif (num_blinks == 3):
+            print("PREVIOUS SONG")
+            main.prev_song()
         elif (num_blinks > 1):
             print(num_blinks)
         num_blinks = 0
-    if (peak_pause == True and peak_counter < 100):
+    if (peak_pause == True and peak_counter < 150):
         peak_counter = peak_counter + 1
-    if (peak_pause == True and peak_counter == 100):
+    if (peak_pause == True and peak_counter == 150):
         peak_counter = 0
         peak_pause = False
     file_path = '/Users/yvonnewang/Documents/neurospotify/file.txt'
@@ -114,10 +109,8 @@ parser.add_argument('-p', '--udp_port', type=str, required=False, default=14739,
 parser.add_argument('-t', '--topic', type=str, required=False,
                     default='/PetalStream/eeg', help="The topic to print")
 args = parser.parse_args()
-
 dispatcher = pythonosc.dispatcher.Dispatcher()
 dispatcher.map(args.topic, print_petal_stream_handler)
-
 server = pythonosc.osc_server.ThreadingOSCUDPServer(
     (args.ip, args.udp_port),
     dispatcher
