@@ -6,11 +6,6 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
 
-# # Set your Spotify app credentials (client ID and client secret)
-# client_id = 'ee2e90dfb2f2444899478ef603544c90'
-# client_secret = '4b5e1351ff7f461b8a3d9f2bf570e3a2'
-# redirect_uri = 'http://localhost:3000/callback'
-
 # # scopes for Remote control playback, Get Available Devices, Pause playback
 # SCOPEs = ['app-remote-control', 'user-read-playback-state',
 #           'user-modify-playback-state']
@@ -79,31 +74,29 @@ from time import sleep
 #     sp.pause_playback()
 
 Active = False
+First = False
 
 
 def play_or_pause():
     global Active
+    global First
     scope = "user-read-playback-state,user-modify-playback-state"
     sp = spotipy.Spotify(client_credentials_manager=SpotifyOAuth(scope=scope))
 
     if Active == False:
-        sp.start_playback(
-            context_uri='spotify:playlist:37i9dQZF1DXcBWIGoYBM5M')
-        Active = not (Active)
+        if not First:
+            sp.start_playback(
+                context_uri='spotify:playlist:37i9dQZF1DXcBWIGoYBM5M')
+            First = True
+        else:
+            sp.start_playback()
+        Active = not Active
     else:
         sp.pause_playback()
-        Active = not (Active)
+        Active = not Active
 
 
 def skip():
     scope = "user-read-playback-state,user-modify-playback-state"
     sp = spotipy.Spotify(client_credentials_manager=SpotifyOAuth(scope=scope))
     sp.next_track()
-
-
-play_or_pause()
-
-sleep(5)
-skip()
-sleep(5)
-play_or_pause()
